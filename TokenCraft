@@ -1,0 +1,112 @@
+class Token:
+    def __init__(self, name, symbol, total_supply):
+        self.name = name
+        self.symbol = symbol
+        self.total_supply = total_supply
+        self.balances = {}  # Maps account address to balance
+
+    def mint(self, account, amount):
+        if amount <= 0:
+            print("Amount to mint must be positive.")
+            return False
+        if account not in self.balances:
+            self.balances[account] = 0
+        if self.total_supply < amount:
+            print("Insufficient total supply to mint.")
+            return False
+        self.balances[account] += amount
+        self.total_supply -= amount
+        print(f"Minted {amount} {self.symbol} tokens to {account}.")
+        return True
+
+    def transfer(self, sender, recipient, amount):
+        if amount <= 0:
+            print("Amount to transfer must be positive.")
+            return False
+        if sender not in self.balances or recipient not in self.balances:
+            print("Sender or recipient account does not exist.")
+            return False
+        if self.balances[sender] < amount:
+            print(f"Insufficient balance in account {sender}.")
+            return False
+
+        self.balances[sender] -= amount
+        self.balances[recipient] = self.balances.get(recipient, 0) + amount
+        print(f"Transferred {amount} {self.symbol} tokens from {sender} to {recipient}.")
+        return True
+
+    def get_balance(self, account):
+        return self.balances.get(account, 0)
+
+    def __str__(self):
+        return f"Token(Name: {self.name}, Symbol: {self.symbol}, Total Supply: {self.total_supply})"
+
+class TokenCraft:
+    def __init__(self):
+        self.tokens = {}  # Maps token symbol to Token object
+
+    def create_token(self, name, symbol, total_supply):
+        if symbol in self.tokens:
+            print(f"Token with symbol {symbol} already exists.")
+            return False
+        token = Token(name, symbol, total_supply)
+        self.tokens[symbol] = token
+        print(f"Created token {name} ({symbol}) with total supply {total_supply}.")
+        return True
+
+    def mint_tokens(self, symbol, account, amount):
+        if symbol not in self.tokens:
+            print(f"Token with symbol {symbol} does not exist.")
+            return False
+        token = self.tokens[symbol]
+        return token.mint(account, amount)
+
+    def transfer_tokens(self, symbol, sender, recipient, amount):
+        if symbol not in self.tokens:
+            print(f"Token with symbol {symbol} does not exist.")
+            return False
+        token = self.tokens[symbol]
+        return token.transfer(sender, recipient, amount)
+
+    def get_balance(self, symbol, account):
+        if symbol not in self.tokens:
+            print(f"Token with symbol {symbol} does not exist.")
+            return None
+        token = self.tokens[symbol]
+        return token.get_balance(account)
+
+    def get_token_info(self, symbol):
+        if symbol not in self.tokens:
+            print(f"Token with symbol {symbol} does not exist.")
+            return None
+        token = self.tokens[symbol]
+        return {
+            "Name": token.name,
+            "Symbol": token.symbol,
+            "Total Supply": token.total_supply,
+            "Balances": token.balances
+        }
+
+# Example Usage
+token_craft = TokenCraft()
+
+# Create tokens
+token_craft.create_token("Bitcoin", "BTC", 1000000)
+token_craft.create_token("Ethereum", "ETH", 2000000)
+
+# Mint tokens
+token_craft.mint_tokens("BTC", "alice", 500)
+token_craft.mint_tokens("ETH", "bob", 300)
+
+# Transfer tokens
+token_craft.transfer_tokens("BTC", "alice", "bob", 200)
+
+# Get balances
+print(f"Alice's BTC balance: {token_craft.get_balance('BTC', 'alice')}")
+print(f"Bob's BTC balance: {token_craft.get_balance('BTC', 'bob')}")
+print(f"Bob's ETH balance: {token_craft.get_balance('ETH', 'bob')}")
+
+# Get token info
+print("\nToken Information:")
+print(token_craft.get_token_info("BTC"))
+print(token_craft.get_token_info("ETH"))
